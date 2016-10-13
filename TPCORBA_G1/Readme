@@ -1,0 +1,154 @@
+Ce document est pour une explication en détailé sur le projet Corba
+
+Jeu de puissance 4 répatie
+
+Superviseur : Dr.NGUYEN Hong Quang
+    Enseignant à l'IFI
+
+Auteurs : 
+    BUI Thi Thanh
+    SIDIBE Guéréguin Der Sylvestre
+    PHU Ba Duong
+    
+    Étudiants de la promotion 19 IFI (Institut Francophone International)
+    
+Ce document sont divisé en deux parties pour décrire la structure du programme et la compilation du programme.
+
+1. La structure du programme
+
+Dans ce projet, nous avons développé le server en java. Et les client en java et c++
+Vous trouverez la structure du programme : 
+
+    TPCORBA_G1
+	--Readme
+	--presentation-html
+	--P4G.idl
+        --client
+            --clientP4G
+                --Client.java : Client obtiens le référence de Servant GameServer
+                --ClientHome.java : L'interface au côté client une fois que le client lancé
+                --GameBoard.java : L'interface de jeu
+                --GameCreation.java : Un objet GameCreation est créé quand le créateur crée un jeu
+                --GamesList.java : un objet contient les listes du jeu
+                --JoinGame.java : un object JoinGame est créé quand un joueur participe au jeu disponible
+           --clientC++
+                --Client.cpp : Client de C++
+                --cmd : Lancer le client de C++
+                --makefile : compilation du client C++
+                --P4G.idl
+                --P4G.hh :  ce code est généré par omniIdl
+                --P4GSK.cc : ce code est généré par omniIdl
+                --setting.hpp :  les configurations
+	    --serverP4G
+                --contient les codes générés de spécification idl en utilisant idlj -fall P4G.idl
+            --setting
+                --Paramettres
+            --images
+	--server
+            --server
+                --GameImpl.java : Game Servant
+                --GameServerImpl.java : GameServer Servant
+                --Server.java : Initialiser le servant GameServer
+            --serverP4G
+                --contient les codes générés de spécification idl en utilisant idlj -fall P4G.idl
+            --setting
+                --Paramettres
+
+TPCORBA_G1/presentation-html
+    La présentation du projet du groupe sous forme html
+
+TPCORBA_G1/client/images
+    Contiens les image qui sont utilisé pour l'interface graphiques de Java
+    
+TPCORBA_G1/client/clientP4G
+    Contiens les code du Java client
+    
+TPCORBA_G1/server/server
+    Contiens les code du Java server
+    
+TPCORBA_G1/server/serverP4G
+    Contiens les code générés par ildj (JacORB)
+    Ces codes sont obtenus en utilisant cette commande :
+        idlj -fall P4G.idl
+        
+TPCORBA_G1/server/setting
+    Les paramettres communs sont configuré dans ce fichier
+        IP_HOST, PORT...
+
+2. Accédé et compilation du code
+
+Configuration du host :
+	Unix :
+		Modifier fichier host : /etc/hosts
+		    Ajouter le ligne : IP_Host localhost
+	Accéder à deux fichiers : setting/Parameters.java
+		Changer les valuers de IP_HOST et PORT correspond aux valeurs du hôte actuel
+
+Compilation du serveur Java :
+
+	Tout d'abord, nous devons démarrer le naming service en utilisant cette commande
+	    tnameserv ORBInitialHost IP_HOST -ORBInitialPort PORT&
+	    Exemple : tnameserv ORBInitialHost 192.168.0.100 -ORBInitialPort 1060&
+
+		-cd TPCORBA_G1
+
+		-javac -Xlint  server/serverP4G/*.java
+ 
+		-javac -Xlint  server/setting/*.java
+
+		-cd server
+
+		-javac -Xlint server/*.java
+ 
+	Lancer serveur :
+
+ 		-java server.Server
+
+Compilation du client Java : 
+
+		-javac -Xlint  client/setting/*.java
+	
+		-javac -Xlint  client/serverP4G/*.java
+	
+		-cd client
+
+		-javac -Xlint clientP4G/*.java
+ 
+Lancer client :
+		-java clientP4G.Client
+
+Compilation du client C++ :
+
+	Accéder le répertoire : cd clientC++
+		Compiler le code en utilisant
+		    make
+
+	Lancer client c++
+		./Client -ORBInitRef NameService=corbaname::IP_address_host:Port_number/NameService
+		Exemple : ./Client -ORBInitRef NameService=corbaname::192.168.0.100:1060/NameService
+
+Utilisation
+
+Client C++
+	Une fois la programme client c++ lancé, vous obtenez le menu le principal suivant: 
+
+	----------Bienvenu dans P4G----------
+	------1 : Lister tous les jeux-------
+	------2 : Lister les jeux ouverts----
+	------3 : Se connecter à un jeu
+	------4 : Créer un jeux
+	Entrez votre choix: Entrez un nombre entre 1 et 4
+
+
+	1:  liste tous les jeux hébergés sur le serveur de jeu
+	2:  liste que les jeux qui ont le status CREATED
+	3:  permet à un joueur de joindre à un jeu créé par un autre grâce à son identifiant. Une fois la connexion faite, la matrice du jeu est affichée et le joueur peut jouer.
+	4: permet à un joueur de créer un jeu. Lorsque le jeu est créé la matrice du jeu est affcihée et le joueur peut joueur.
+
+	Pour jouer, il suffit juste de choisir le numéro de la colonne (de 1à 7) dans laquelle l’on souhaite place son pion.
+	Au cous d’une partie de jeu, pour quitter, il suffit de choisir 8 pendant son tour.
+
+Avec le client Java
+
+	Les utilisation sont manipulé dans une interface graphique. Les jeux donc deviennent plus facile à jouer.
+

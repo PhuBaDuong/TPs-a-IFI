@@ -1,0 +1,361 @@
+package environment;
+
+import jade.core.AID;
+import jade.core.Agent;
+import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.TickerBehaviour;
+import jade.domain.DFService;
+import jade.domain.FIPAException;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
+import jade.lang.acl.UnreadableException;
+
+import java.awt.Image;
+import java.awt.Rectangle;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Random;
+
+import javax.swing.ImageIcon;
+
+import utils.Paramaters;
+
+public class EnemyAircraft extends Agent implements Paramaters {
+
+	private static final long serialVersionUID = 1L;
+
+	private int positionX;
+	private int positionY;
+	private int dx;
+	private int dy;
+	private String enemyAircraftName;
+	private String direction;
+	private boolean visible;
+	private boolean active;
+	protected ArrayList<Missile> missiles;
+	private Image imageEnemyAircraft;
+
+	public EnemyAircraft(int x, int y) {
+		this.missiles = new ArrayList<Missile>();
+		this.enemyAircraftName = ENEMY_AIRCRAFT_NAME;
+		this.direction = DEFAUT_ENEMY_DIRECTION;
+		this.visible = true;
+		this.active = false;
+		this.positionX = x;
+		this.positionY = y;
+		ImageIcon imageIcon = new ImageIcon(IMAGE_PATH + getEnemyAircraftName()
+				+ getDirection() + EXTENSION);
+		imageEnemyAircraft = imageIcon.getImage();
+	}
+
+	public void setup() {
+		DFAgentDescription dfd = new DFAgentDescription();
+		dfd.setName(getAID());
+		ServiceDescription sd = new ServiceDescription();
+		sd.setType("Enemy");
+		sd.setName("JADE-recieving");
+		dfd.addServices(sd);
+		try {
+			DFService.register(this, dfd);
+		} catch (FIPAException fe) {
+			fe.printStackTrace();
+		}
+
+		addBehaviour(new CyclicBehaviour() {
+
+			@Override
+			public void action() {
+				// TODO Auto-generated method stub
+				MessageTemplate mt = MessageTemplate
+						.MatchPerformative(ACLMessage.REQUEST);
+				ACLMessage msg = myAgent.receive(mt);
+				if (msg != null) {
+					CurrentPosition userAircraftPosition = null;
+					try {
+						userAircraftPosition = (CurrentPosition) msg
+								.getContentObject();
+						if ((Math.abs(userAircraftPosition.getPositionX()
+								- getX()) < EFFECT_RADIUS)
+								&& Math.abs(userAircraftPosition.getPositionY()
+										- getY()) < EFFECT_RADIUS) {
+							active = true;
+							if (userAircraftPosition.isVisible()) {
+								findOutPositionToAttack(
+										userAircraftPosition.getPositionX()
+												- getX(),
+										userAircraftPosition.getPositionY()
+												- getY());
+							}
+						} else {
+							active = false;
+						}
+					} catch (UnreadableException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+			}
+		});
+		if (!active) {
+			addBehaviour(new TickerBehaviour(this, 10) {
+				int timeToChangeDirection = 0;
+
+				@Override
+				protected void onTick() {
+
+					if (timeToChangeDirection > INTERVAL_TIME_CHANGING_DIRECTION) {
+						timeToChangeDirection = 0;
+						if (isVisible()) {
+							changeDirection();
+							fire();
+						}
+					} else {
+						timeToChangeDirection++;
+						changePosition();
+						move();
+					}
+
+				}
+			});
+		}
+
+	}
+
+	public void findOutPositionToAttack(int distanceX, int distanceY) {
+		if (Math.abs(distanceX) > AIRCRAFT_WIDTH / 2
+				&& Math.abs(distanceX) < Math.abs(distanceY)) {
+			setDx(distanceX / Math.abs(distanceX));
+			setDirection(getDx() == -1 ? DIRECTION_LEFT : DIRECTION_RIGHT);
+			setImageEnemyAircraft(enemyAircraftName, getDirection());
+			setDy(0);
+		}
+
+		if (Math.abs(distanceY) > AIRCRAFT_HEIGHT / 2
+				&& Math.abs(distanceX) > Math.abs(distanceY)) {
+			setDy(distanceY / Math.abs(distanceY));
+			setDirection(getDy() == -1 ? DIRECTION_UP : DIRECTION_DOWN);
+			setImageEnemyAircraft(enemyAircraftName, getDirection());
+			setDx(0);
+		}
+
+		if (Math.abs(distanceX) <= AIRCRAFT_WIDTH / 2
+				&& Math.abs(distanceY) != 0) {
+			setDirection(distanceY > 0 ? DIRECTION_DOWN : DIRECTION_UP);
+			setImageEnemyAircraft(enemyAircraftName, getDirection());
+			if (isVisible())
+				fire();
+		}
+
+		if (Math.abs(distanceX) != 0
+				&& Math.abs(distanceY) <= AIRCRAFT_HEIGHT / 2) {
+			setDirection(distanceX > 0 ? DIRECTION_RIGHT : DIRECTION_LEFT);
+			setImageEnemyAircraft(enemyAircraftName, getDirection());
+			if (isVisible())
+				fire();
+		}
+	}
+
+	public Image getImageEnemyAircraft() {
+		return imageEnemyAircraft;
+	}
+
+	public void setImageEnemyAircraft(String airCraftName, String direction) {
+		ImageIcon imageIcon = new ImageIcon(IMAGE_PATH + airCraftName
+				+ direction + EXTENSION);
+		this.imageEnemyAircraft = imageIcon.getImage();
+	}
+
+	public Rectangle getBounds() {
+		return new Rectangle(getX(), getY(), AIRCRAFT_WIDTH, AIRCRAFT_HEIGHT);
+	}
+
+	public ArrayList<Missile> getMissiles() {
+		return missiles;
+	}
+
+	public void setMissiles(ArrayList<Missile> missiles) {
+		this.missiles = missiles;
+	}
+
+	public String getEnemyAircraftName() {
+		return enemyAircraftName;
+	}
+
+	public void setEnemyAircraftName(String aircraftName) {
+		this.enemyAircraftName = aircraftName;
+	}
+
+	public int getX() {
+		return positionX;
+	}
+
+	public void setX(int x) {
+		this.positionX = x;
+	}
+
+	public int getY() {
+		return positionY;
+	}
+
+	public void setY(int y) {
+		this.positionY = y;
+	}
+
+	public int getDx() {
+		return dx;
+	}
+
+	public void setDx(int dx) {
+		this.dx = dx;
+	}
+
+	public int getDy() {
+		return dy;
+	}
+
+	public void setDy(int dy) {
+		this.dy = dy;
+	}
+
+	public String getDirection() {
+		return direction;
+	}
+
+	public void setDirection(String direction) {
+		this.direction = direction;
+	}
+
+	public boolean isVisible() {
+		return visible;
+	}
+
+	public void setVisible(boolean visible) {
+		this.visible = visible;
+	}
+
+	public void move() {
+		if (canMove()) {
+			positionX += dx;
+			positionY += dy;
+		}
+	}
+
+	public boolean canMove() {
+		if (getDirection() == null)
+			return true;
+		else if (getX() < 0 && getDirection().equals(DIRECTION_LEFT))
+			return false;
+		else if (getX() > FRAME_WIDTH - AIRCRAFT_WIDTH
+				&& getDirection().equals(DIRECTION_RIGHT))
+			return false;
+		else if (getY() < 0 && getDirection().equals(DIRECTION_UP))
+			return false;
+		else if (getY() > FRAME_HEIGHT - AIRCRAFT_HEIGHT
+				&& getDirection().equals(DIRECTION_DOWN))
+			return false;
+		return true;
+	}
+
+	public void changeDirection() {
+		Random random = new Random();
+		int direction = random.nextInt(4);
+		if (direction == 0) {
+			setDirection(DIRECTION_LEFT);
+			setImage(getEnemyAircraftName(), getDirection());
+			return;
+		}
+		if (direction == 1) {
+			setDirection(DIRECTION_RIGHT);
+			setImage(getEnemyAircraftName(), getDirection());
+			return;
+		}
+		if (direction == 2) {
+			setDirection(DIRECTION_UP);
+			setImage(getEnemyAircraftName(), getDirection());
+			return;
+		}
+		if (direction == 3) {
+			setDirection(DIRECTION_DOWN);
+			setImage(getEnemyAircraftName(), getDirection());
+			return;
+		}
+	}
+
+	public void changePosition() {
+
+		if (getDirection().equals(DIRECTION_LEFT)) {
+			setDy(0);
+			setDx(-1);
+		}
+
+		if (getDirection().equals(DIRECTION_RIGHT)) {
+			setDy(0);
+			setDx(1);
+		}
+
+		if (getDirection().equals(DIRECTION_UP)) {
+			setDx(0);
+			setDy(-1);
+		}
+
+		if (getDirection().equals(DIRECTION_DOWN)) {
+			setDx(0);
+			setDy(1);
+		}
+
+	}
+
+	public void fire() {
+		if (getDirection().equals(DIRECTION_RIGHT))
+			missiles.add(new Missile(getX() + AIRCRAFT_WIDTH, getY()
+					+ AIRCRAFT_HEIGHT / 2 - MISSILE_HEIGHT / 2, DIRECTION_RIGHT));
+		if (getDirection().equals(DIRECTION_LEFT))
+			missiles.add(new Missile(getX(), getY() + AIRCRAFT_HEIGHT / 2
+					- MISSILE_HEIGHT / 2, DIRECTION_LEFT));
+		if (getDirection().equals(DIRECTION_DOWN))
+			missiles.add(new Missile(getX() + AIRCRAFT_WIDTH / 2
+					- MISSILE_WIDTH / 2, getY() + AIRCRAFT_HEIGHT,
+					DIRECTION_DOWN));
+		if (getDirection().equals(DIRECTION_UP))
+			missiles.add(new Missile(getX() + AIRCRAFT_WIDTH / 2
+					- MISSILE_WIDTH / 2, getY(), DIRECTION_UP));
+	}
+
+	public void setImage(String airCraftName, String direction) {
+		ImageIcon imageIcon = new ImageIcon(IMAGE_PATH + airCraftName
+				+ direction + EXTENSION);
+		this.imageEnemyAircraft = imageIcon.getImage();
+	}
+}
+
+class NormalAction extends TickerBehaviour implements Paramaters {
+
+	private static final long serialVersionUID = 1L;
+	int timeToChangeDirection = 0;
+	EnemyAircraft agent;
+
+	public NormalAction(Agent a, long period) {
+		super(a, period);
+		agent = (EnemyAircraft) a;
+	}
+
+	@Override
+	protected void onTick() {
+
+		if (timeToChangeDirection > INTERVAL_TIME_CHANGING_DIRECTION) {
+			timeToChangeDirection = 0;
+			if (agent.isVisible()) {
+				agent.changeDirection();
+				agent.fire();
+			}
+		} else {
+			timeToChangeDirection++;
+			agent.changePosition();
+			agent.move();
+		}
+
+	}
+
+}

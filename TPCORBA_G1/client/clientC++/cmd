@@ -1,0 +1,1 @@
+./Client -ORBInitRef NameService=corbaname::192.168.0.100:1060/NameService

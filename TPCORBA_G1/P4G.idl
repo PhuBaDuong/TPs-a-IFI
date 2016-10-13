@@ -1,0 +1,45 @@
+//
+// P4G.idl
+// Specification d'interfaces du jeu puissance 4 reparti
+//
+
+module serverP4G {
+// etat du jeu
+enum GameState { CREATED, RUNNING, TERMINATED, ABANDONED};
+// donnees du jeu (etat + configuration en cours)
+typedef char GameMatrix[42];	// matrice du jeu (42 caracteres)
+struct GameData {
+	GameState state;
+	GameMatrix matrix;
+	};
+// structure des joueurs en cours
+struct Players {
+	string player1;	// nickname du joueur 1
+	string player2;	// nickname du joueur 2
+	};
+
+// code de retour apres d'un coup:SUCCESS - coup reussit, WIN - gagne, NULL - match nul
+// G_OVER - jeu termine, G_OPEN - jeu ouvert (manque d'un joueur), P_INV - joueur invalide
+enum ReturnCode { SUCCESS, WIN, XNULL, G_OVER, G_OPEN, P_INV};
+enum Column {ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN}; // seulement 7 valeurs possibles
+
+typedef string GameId;	// chaque jeu a un identificateur unique
+typedef sequence<GameId> ListGames;
+
+interface Game {	// interface d'un jeu
+	GameData getGameData();
+	GameId getGameId();
+	Players	getPlayers();	// retourner la liste des joueurs connectes
+	ReturnCode connectGame (in string player);	// demande de participation au jeu
+	ReturnCode play (in string player, in Column col); // jetter un jeton
+	boolean quitPlayer (in string player);	// joueur player quitte le jeu
+	boolean ismyTurn (in string player);	// est-ce le tour de player?
+	};
+
+interface GameServer {
+	ListGames listAllGames ();	// retourner la liste de tous les jeux du serveur
+	ListGames listOpenGames ();	// retourner la liste des jeux ouverts
+	Game getGame (in GameId id);	// chercher l'IOR du jeu id
+	Game createGame (in string player);	// creer un nouveau jeu
+	};
+};

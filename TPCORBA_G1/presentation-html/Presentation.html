@@ -1,0 +1,85 @@
+<h1>Institut Francophone International</h1>
+<h2>Jeu de puissance 4 réparti</h2>
+
+<b>Superviseur : Dr. NGUYEN Hong Quang</b> <br><br>
+
+Étudiants : 
+BUI Thi Thanh,
+SIDIBE Guéréguin Der Sylvestre,
+PHU Ba Duong <br> <br>
+
+Promotion 19 IFI <br> <br>
+
+<h3>I.L'introduction</h3> 
+Dans ce travail pratique, nous avons réalisé un petit jeu réparti en utilisant Corba qui on l'appele Jeu de puissance 4 répartie.<br>
+Corba est en réalité, une technologie, qui nous permet de construire une application répartie en utilisant plusieurs langages de programmation.<br>
+Ce jeu est construit sous le modèle Server/Client. Le Serveur est écrit en utilisant Java(jacORB). Client est écrit en utilisant C++(omniORB)  et Java(jacORB).<br>Ensuite, nous avons testé le fonctionnement du jeu avec plusieur machines.
+<br><br>
+
+<h3>II.La conception</h3>
+En effet, une application de Corba est dévelopé sous le modèle Server/Client. <br>
+Notre une application Corba est dévelopé sous le modèle Server/Client et une composée de deux parties: une partie serveur dévelopée en langage <br> java et avec jacORB et une partie cliente mise en place en C++ avec omniORB et en java jacORB.
+
+<br><img alt="Diagramme1.png" src="images/image00.png" style="width: 600px; height: 400px; margin-left: 0.00px; margin-top: 0.00px; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px);" title=""><br>
+<i>Architecture globale du système</i><br>
+<br><img alt="use.png" src="images/image01.png" style="width: 600px; height: 400px; margin-left: 0.00px; margin-top: 0.00px; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px);" title=""><br>
+<i>Diagramme de cas d’utilisation</i><br>
+
+<br><b>Le scénario commun du jeu</b><br><br>
+
+Au côte du serveur : <br>
+1 .Initialiser un GameServer Servant et le mettre sur le NamingService<br>
+<br>
+Au côte du client : <br>
+2. Lancer programme du client et obtenir un objet référence GameServer servant<br>
+3. Appeller fonctions de création d'un jeu de GameServer servant<br>
+
+<br>
+Au côte du serveur : <br>
+4 .Initialiser un Game Servant et le mettre sur le NamingService<br>
+
+<br>
+Au côte du client : <br>
+5. Obtenir un objet référence Game Servant<br>
+6. Un autre client demande au GameServer la liste du jeu disponible<br>
+
+<br>
+Au côte du serveur : <br>
+7. Retourner la liste du jeu disponibles<br>
+
+<br>
+Au côte du client : <br>
+8. Se Connecter à un jeu choisi dans la liste<br>
+9. Les deux jeueurs se jouent<br>
+<br>
+
+<br><b>L'implémentation</b> <br>
+Dans cette implémentation, nous avons utilisé JacORB pour le côté de Java, et omniORB au côté de C++. <br>
+Nous sommes arrivé à faire les code server en utilisant jacORB et client en Java et C++.
+
+<h3>III. Les problèmes et limitations du programme</h3>
+
+<b>Les problèmes </b><br><br>
+Le jeu n'est pas vraiment testé complètement. Peut-être, il y a des erreurs existant que nous ne sommes pas arrivé à trouver.<br>
+Les joueur qui a crée le jeu est tourjour la première personne qui joue. En effet, on a besoin d'une amélioration pour choisi <br>aléatoirement le joueur qui joue premièrement.
+
+<br><br>
+<b>Les limitations</b> <br><br>
+Le fonction "quit" jeu ne fonctionne pas bien. Une fois que le créateur de jeu quite son jeu, ce jeu doit terminer. Si non, une autre joueur <br> participe à ce jeu pour continuer à jouer avec le rôle de créateur. Cela entrainera des problèmes de conflit de le tour <br>des deux joueurs.<br>
+
+Cependant, dans le cas, le participant quite son jeu. Le jeu peut continuer à être joué s'il y a un autre joueur qui participe à ce jeu avec<br> le rôle de deuxième joueur.<br><br>
+
+<h3>IV. Les expériences</h3>
+	- Jouer entre deux clients java</b> <br>
+<br>- Jouer entre deux clients c++ <br>
+<br>- Jouer entre un client java et un client c++ <br><br>
+Fondamentallement, le programme a marché suffisamment les fonctions nécessaires comme dans la spécification de fichie P4G.idl <br>
+l'objet GameServer peut géré plusieurs jeux à même temps avec les liste IDs mis dans une liste. Les objets des jeux sont les objets <br> indépendants avec les espace différents. <br>
+
+Les problèmes restants à résoudres sont mentionnés dans la partie de limitations. Nous essayerons de résourdre ces limitations dans queljours <br> après pour avoir une bonne version du jeu.
+
+<h3>V. La conclusion</h3>
+
+	En travaillant sur ce TP, nous avons bien compris les principes de Corba. Comment peut-on construire une application répartie en <br> utilisant Corba avec plusieurs langage de programmation. Nous avons aussi trouvé les avantages de Corba par rapport au RMI, programmation de <br> Socket en fonction de l’implémentation des applications répaties.
+<br><br>
+
